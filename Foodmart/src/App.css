@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@keyframes bounceSlow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  
+  .animate-bounce-slow {
+    animation: bounceSlow 4s ease-in-out infinite;
+  }

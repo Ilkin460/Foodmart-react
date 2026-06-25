@@ -19,9 +19,8 @@ import brandLogo2 from '../../assets/img/gallery/product-thumb-12.jpg';
 import brandLogo3 from '../../assets/img/gallery/product-thumb-13.jpg';
 import brandLogo4 from '../../assets/img/gallery/product-thumb-14.jpg';
 
-// Data to ProductContext
+// Ürün verileri ProductContext'ten gelir
 import { useProducts } from '../context/ProductContext';
-import { useFav } from '../context/FavContext';
 
 // AD
 import adChocolate from '../../assets/img/gallery/ad-image-3.png';
@@ -48,14 +47,15 @@ import googlePlayImg from '../../assets/img/gallery/google-play.jpg';
 const Home = () => {
   const { addBasket, increase, decrease, sebet } = useContext(BASKET)
   const { products, categories, selectedCategory, setSelectedCategory } = useProducts()
-  const { toggleFav, isFav } = useFav()
 
+  // Bir ürünün sepetteki miktarını döndürür
   const getQty = (id) => sebet.find(i => i.id === id)?.qty ?? 0
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeTab, setActiveTab] = useState('ALL');
   const [showAll, setShowAll] = useState(false);
 
+  // Header'dan gelen kategori seçimini dinle
   useEffect(() => {
     setActiveTab(selectedCategory);
     setShowAll(false);
@@ -87,6 +87,8 @@ const Home = () => {
     return () => clearInterval(timer);
   }, [slides.length]);
   
+  // Kategoriler ProductContext'ten geliyor
+
   const brands = [
     { id: 1, name: "Fresh Farm", items: "12", logo: brandLogo1 },
     { id: 2, name: "Bio Organic", items: "8", logo: brandLogo2 },
@@ -265,14 +267,8 @@ const Home = () => {
           {filteredProducts.map((product) => (
             <div key={product.id} className="p-5 border border-gray-100 rounded-2xl hover:shadow-xl transition-all duration-300 group relative">
               
-              <button
-                onClick={() => toggleFav(product)}
-                className={`absolute top-4 right-4 p-2 rounded-full transition-colors z-10 ${isFav(product.id) ? 'bg-red-100' : 'bg-gray-50 hover:bg-red-100'}`}
-              >
-                {isFav(product.id)
-                  ? <FaHeart className="text-red-500 w-5 h-5" />
-                  : <AiOutlineHeart className="text-gray-400 w-5 h-5 hover:text-red-500 transition-colors" />
-                }
+              <button className="absolute top-4 right-4 p-2 bg-gray-50 rounded-full hover:bg-red-100 transition-colors z-10">
+                <AiOutlineHeart className="text-gray-400 w-5 h-5 hover:text-red-500 transition-colors" />
               </button>
 
               <img src={product.img} alt={product.name} className="w-full h-40 object-contain mb-4" />

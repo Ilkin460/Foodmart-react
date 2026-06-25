@@ -1,22 +1,18 @@
 import React, { useState, useContext } from 'react';
 import logo from '../../assets/img/gallery/logo.png';
-import { FiSearch } from 'react-icons/fi';
-import { FaHeart } from 'react-icons/fa';
+import { FiSearch, FiHeart } from 'react-icons/fi';
 import { IoPersonOutline } from 'react-icons/io5';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { BASKET } from '../context/BasketContext';
 import { useProducts } from '../context/ProductContext';
-import { useFav } from '../context/FavContext';
 import SearchBar from './SearchBar';
 
 const Header = () => {
   const [opensebet, setOpensebet] = useState(false);
-  const [openFav, setOpenFav] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
   const [mobileCat, setMobileCat] = useState('');
   const { sebet, increase, decrease, removeItem, totalPrice } = useContext(BASKET);
   const { searchQuery, setSearchQuery, filteredProducts, categories, selectedCategory, setSelectedCategory } = useProducts();
-  const { favList, toggleFav } = useFav();
 
   const totalQty = sebet.reduce((sum, item) => sum + item.qty, 0);
 
@@ -54,16 +50,8 @@ const Header = () => {
             <IoPersonOutline className="w-4 h-4 md:w-5 h-5" />
           </button>
 
-          <button
-            className="relative p-2.5 bg-[#F5F5F5] text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
-            onClick={() => setOpenFav(true)}
-          >
-            <FaHeart className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${favList.length > 0 ? 'text-red-500' : 'text-gray-400'}`} />
-            {favList.length > 0 && (
-              <span className="absolute -top-1.5 -right-1 w-4.5 h-4.5 min-w-[18px] min-h-[18px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {favList.length}
-              </span>
-            )}
+          <button className="p-2.5 bg-[#F5F5F5] text-gray-700 rounded-full hover:bg-gray-200 transition-colors">
+            <FiHeart className="w-4 h-4 md:w-5 h-5" />
           </button>
 
           <div 
@@ -246,48 +234,6 @@ const Header = () => {
                 <button onClick={() => setOpensebet(false)} className="w-full text-sm text-gray-400 hover:text-gray-700 text-center transition-colors">Alışverişə davam et</button>
               </div>
             )}
-          </div>
-        </>
-      )}
-
-      {/* ── FAV PANEL ── */}
-      {openFav && (
-        <>
-          <div className="fixed inset-0 bg-opacity-40 z-[100]" onClick={() => setOpenFav(false)} />
-          <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[101] flex flex-col">
-
-            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">Favorites</h2>
-              <button onClick={() => setOpenFav(false)} className="text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-              {favList.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 gap-3">
-                  <span className="text-5xl">🤍</span>
-                  <p className="font-medium">Bəyəndiyiniz məhsul yoxdur</p>
-                  <p className="text-sm">Əlavə edin</p>
-                </div>
-              ) : (
-                favList.map(item => (
-                  <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <img src={item.img} alt={item.name} className="w-14 h-14 object-contain rounded-lg bg-white p-1 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{item.cat}</p>
-                      <p className="text-sm font-extrabold text-gray-900 mt-1">{item.price}</p>
-                    </div>
-                    <button
-                      onClick={() => toggleFav(item)}
-                      className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors shrink-0"
-                    >
-                      <FaHeart className="w-4 h-4 text-red-500" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-
           </div>
         </>
       )}

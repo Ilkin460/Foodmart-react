@@ -19,9 +19,8 @@ import brandLogo2 from '../../assets/img/gallery/product-thumb-12.jpg';
 import brandLogo3 from '../../assets/img/gallery/product-thumb-13.jpg';
 import brandLogo4 from '../../assets/img/gallery/product-thumb-14.jpg';
 
-// Data to ProductContext
+// Ürün verileri ProductContext'ten gelir
 import { useProducts } from '../context/ProductContext';
-import { useFav } from '../context/FavContext';
 
 // AD
 import adChocolate from '../../assets/img/gallery/ad-image-3.png';
@@ -47,19 +46,12 @@ import googlePlayImg from '../../assets/img/gallery/google-play.jpg';
 
 const Home = () => {
   const { addBasket, increase, decrease, sebet } = useContext(BASKET)
-  const { products, categories, selectedCategory, setSelectedCategory } = useProducts()
-  const { toggleFav, isFav } = useFav()
+  const { products, categories } = useProducts()
 
+  // Bir ürünün sepetteki miktarını döndürür
   const getQty = (id) => sebet.find(i => i.id === id)?.qty ?? 0
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [activeTab, setActiveTab] = useState('ALL');
-  const [showAll, setShowAll] = useState(false);
-
-  useEffect(() => {
-    setActiveTab(selectedCategory);
-    setShowAll(false);
-  }, [selectedCategory]);
 
   const slides = [
     {
@@ -87,6 +79,8 @@ const Home = () => {
     return () => clearInterval(timer);
   }, [slides.length]);
   
+  // Kategoriler ProductContext'ten geliyor
+
   const brands = [
     { id: 1, name: "Fresh Farm", items: "12", logo: brandLogo1 },
     { id: 2, name: "Bio Organic", items: "8", logo: brandLogo2 },
@@ -97,6 +91,9 @@ const Home = () => {
     { id: 7, name: "Dairy Best", items: "23", logo: brandLogo3 },
     { id: 8, name: "Green Valley", items: "15", logo: brandLogo4 },
   ];
+
+  const [activeTab, setActiveTab] = useState('ALL');
+  const [showAll, setShowAll] = useState(false);
 
   const allProducts     = products;
   const popularProducts = products;
@@ -217,20 +214,14 @@ const Home = () => {
             {categories.map((cat) => (
               <SwiperSlide key={cat.id}>
               <div 
-                onClick={() => {
-                  setActiveTab(cat.name);
-                  setSelectedCategory(cat.name);
-                  setShowAll(false);
-                  document.getElementById('trending-products')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`flex flex-col items-center justify-center p-6 rounded-2xl cursor-pointer border transition-all duration-300 group hover:-translate-y-2 hover:shadow-xl hover:border-amber-500 ${activeTab === cat.name ? 'bg-amber-500 border-amber-500' : (cat.bgColor || 'bg-amber-50') + ' border-transparent'}`}
+                className={`flex flex-col items-center justify-center p-6 rounded-2xl ${cat.bgColor || 'bg-amber-50'} cursor-pointer border border-transparent transition-all duration-300 group hover:-translate-y-2 hover:shadow-xl hover:border-amber-500`}
               >
                 <img 
                   src={cat.icon} 
                   alt={cat.name} 
                   className="w-9 h-9 mb-4 transition-transform duration-300 group-hover:scale-110" 
                 />
-                <span className={`text-sm font-bold transition-colors group-hover:text-amber-600 ${activeTab === cat.name ? 'text-white' : 'text-gray-900'}`}>
+                <span className="text-sm font-bold text-gray-900 transition-colors group-hover:text-amber-600">
                   {cat.name}
                 </span>
               </div>
@@ -243,7 +234,7 @@ const Home = () => {
 
       {/* ================= PRODUCTS ================= */}
 
-      <section id="trending-products" className="w-full py-16 bg-white">
+      <section className="w-full py-16 bg-white">
       <div className="max-w-[1440px] mx-auto px-6 md:px-12">
         
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
@@ -252,7 +243,7 @@ const Home = () => {
             {['ALL', 'Fruits & Veges', 'Juices', 'Bakery', 'Beverages', 'Meat Products', 'Flour & Bakery'].map((tab) => (
               <button 
                 key={tab}
-                onClick={() => { setActiveTab(tab); setSelectedCategory(tab); setShowAll(false); }}
+                onClick={() => { setActiveTab(tab); setShowAll(false); }}
                 className={`font-bold pb-1 border-b-2 transition-colors ${activeTab === tab ? 'border-amber-500 text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-900'}`}
               >
                 {tab}
@@ -265,14 +256,8 @@ const Home = () => {
           {filteredProducts.map((product) => (
             <div key={product.id} className="p-5 border border-gray-100 rounded-2xl hover:shadow-xl transition-all duration-300 group relative">
               
-              <button
-                onClick={() => toggleFav(product)}
-                className={`absolute top-4 right-4 p-2 rounded-full transition-colors z-10 ${isFav(product.id) ? 'bg-red-100' : 'bg-gray-50 hover:bg-red-100'}`}
-              >
-                {isFav(product.id)
-                  ? <FaHeart className="text-red-500 w-5 h-5" />
-                  : <AiOutlineHeart className="text-gray-400 w-5 h-5 hover:text-red-500 transition-colors" />
-                }
+              <button className="absolute top-4 right-4 p-2 bg-gray-50 rounded-full hover:bg-red-100 transition-colors z-10">
+                <AiOutlineHeart className="text-gray-400 w-5 h-5 hover:text-red-500 transition-colors" />
               </button>
 
               <img src={product.img} alt={product.name} className="w-full h-40 object-contain mb-4" />

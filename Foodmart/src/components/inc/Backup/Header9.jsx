@@ -1,30 +1,19 @@
 import React, { useState, useContext } from 'react';
 import logo from '../../assets/img/gallery/logo.png';
-import { FiSearch } from 'react-icons/fi';
-import { FaHeart } from 'react-icons/fa';
+import { FiSearch, FiHeart } from 'react-icons/fi';
 import { IoPersonOutline } from 'react-icons/io5';
 import { IoMdArrowDropdown } from 'react-icons/io';
 import { BASKET } from '../context/BasketContext';
 import { useProducts } from '../context/ProductContext';
-import { useFav } from '../context/FavContext';
 import SearchBar from './SearchBar';
 
 const Header = () => {
   const [opensebet, setOpensebet] = useState(false);
-  const [openFav, setOpenFav] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
-  const [mobileCat, setMobileCat] = useState('');
   const { sebet, increase, decrease, removeItem, totalPrice } = useContext(BASKET);
-  const { searchQuery, setSearchQuery, filteredProducts, categories, selectedCategory, setSelectedCategory } = useProducts();
-  const { favList, toggleFav } = useFav();
+  const { searchQuery, setSearchQuery, filteredProducts } = useProducts();
 
   const totalQty = sebet.reduce((sum, item) => sum + item.qty, 0);
-
-  const uniqueCategories = [...new Map(categories.map(c => [c.name, c])).values()];
-
-  const mobileDisplayProducts = filteredProducts.filter(p =>
-    mobileCat ? p.cat === mobileCat : true
-  );
 
   return (
     <header className="w-full bg-white font-sans sticky top-0 z-50 shadow-sm">
@@ -38,6 +27,7 @@ const Header = () => {
         <SearchBar />
 
         <div className="flex items-center gap-2 md:gap-6">
+          {/* Mobile search button */}
           <button
             className="p-2.5 bg-[#F5F5F5] text-gray-700 rounded-full hover:bg-gray-200 min-[993px]:hidden"
             onClick={() => setMobileSearch(v => !v)}
@@ -54,16 +44,8 @@ const Header = () => {
             <IoPersonOutline className="w-4 h-4 md:w-5 h-5" />
           </button>
 
-          <button
-            className="relative p-2.5 bg-[#F5F5F5] text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
-            onClick={() => setOpenFav(true)}
-          >
-            <FaHeart className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${favList.length > 0 ? 'text-red-500' : 'text-gray-400'}`} />
-            {favList.length > 0 && (
-              <span className="absolute -top-1.5 -right-1 w-4.5 h-4.5 min-w-[18px] min-h-[18px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {favList.length}
-              </span>
-            )}
+          <button className="p-2.5 bg-[#F5F5F5] text-gray-700 rounded-full hover:bg-gray-200 transition-colors">
+            <FiHeart className="w-4 h-4 md:w-5 h-5" />
           </button>
 
           <div 
@@ -89,17 +71,7 @@ const Header = () => {
       {/* Mobil search panel */}
       {mobileSearch && (
         <div className="min-[993px]:hidden px-4 pb-3 relative">
-          <div className="flex items-center bg-[#F5F5F5] rounded-full px-4 py-2.5 gap-2">
-            <select
-              className="bg-transparent text-xs text-gray-600 outline-none border-r border-gray-300 pr-2 mr-1 cursor-pointer shrink-0"
-              value={mobileCat}
-              onChange={(e) => setMobileCat(e.target.value)}
-            >
-              <option value="">All</option>
-              {uniqueCategories.map(cat => (
-                <option key={cat.id} value={cat.name}>{cat.name}</option>
-              ))}
-            </select>
+          <div className="flex items-center bg-[#F5F5F5] rounded-full px-4 py-2.5">
             <input
               type="text"
               placeholder="Məhsul axtar..."
@@ -109,8 +81,8 @@ const Header = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
-              className="text-gray-400 hover:text-gray-700 ml-1 shrink-0"
-              onClick={() => { setSearchQuery(''); setMobileSearch(false); setMobileCat(''); }}
+              className="text-gray-400 hover:text-gray-700 ml-2"
+              onClick={() => { setSearchQuery(''); setMobileSearch(false); }}
             >
               {searchQuery ? (
                 <span className="text-sm font-bold">✕</span>
@@ -120,20 +92,25 @@ const Header = () => {
             </button>
           </div>
 
+          {/* Mobil dropdown nəticələr */}
           {searchQuery && (
             <div className="absolute left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 max-h-72 overflow-y-auto">
-              {mobileDisplayProducts.length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <div className="px-5 py-4 text-sm text-gray-400 text-center">
                   Nəticə tapılmadı
                 </div>
               ) : (
-                mobileDisplayProducts.map(product => (
+                filteredProducts.map(product => (
                   <div
                     key={product.id}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-amber-50 cursor-pointer transition-colors"
-                    onClick={() => { setSearchQuery(''); setMobileSearch(false); setMobileCat(''); }}
+                    onClick={() => { setSearchQuery(''); setMobileSearch(false); }}
                   >
-                    <img src={product.img} alt={product.name} className="w-10 h-10 object-contain rounded-lg bg-gray-50 p-1 shrink-0" />
+                    <img
+                      src={product.img}
+                      alt={product.name}
+                      className="w-10 h-10 object-contain rounded-lg bg-gray-50 p-1 shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
                       <p className="text-xs text-gray-400">{product.cat}</p>
@@ -151,19 +128,11 @@ const Header = () => {
 
       <div className="max-w-360 mx-auto px-6 md:px-12 py-4 flex items-center gap-8 text-[14px] font-medium text-gray-500">
         <div className="relative flex items-center text-gray-900 font-bold">
-          <select 
-            className="bg-transparent border-0 outline-none pr-5 cursor-pointer appearance-none font-bold text-gray-900 hover:text-amber-500 transition-colors"
-            value={selectedCategory === 'ALL' ? '' : selectedCategory}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSelectedCategory(val || 'ALL');
-              document.getElementById('trending-products')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
+          <select className="bg-transparent border-0 outline-none pr-5 cursor-pointer appearance-none font-bold text-gray-900 hover:text-amber-500 transition-colors">
             <option>Shop by Departments</option>
-            {uniqueCategories.map(cat => (
-              <option key={cat.id}>{cat.name}</option>
-            ))}
+            <option>Groceries</option>
+            <option>Drinks</option>
+            <option>Chocolates</option>
           </select>
           <IoMdArrowDropdown className="w-4 h-4 text-gray-800 absolute right-0 pointer-events-none" />
         </div>
@@ -194,12 +163,22 @@ const Header = () => {
 
       {opensebet && (
         <>
-          <div className="fixed inset-0 bg-opacity-40 z-[100]" onClick={() => setOpensebet(false)} />
+          <div 
+            className="fixed inset-0 bg-opacity-40 z-[100]" 
+            onClick={() => setOpensebet(false)}
+          />
           <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[101] flex flex-col transition-transform duration-300">
             
             <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">Your Cart</h2>
-              <button onClick={() => setOpensebet(false)} className="text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
+              <h2 className="text-xl font-bold text-gray-900">
+                Your Cart
+              </h2>
+              <button 
+                onClick={() => setOpensebet(false)} 
+                className="text-gray-400 hover:text-black font-bold text-2xl leading-none"
+              >
+                &times;
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
@@ -215,20 +194,37 @@ const Header = () => {
                   return (
                     <div key={item.id} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl">
                       <div className="flex items-start gap-3">
-                        {item.img && <img src={item.img} alt={item.name} className="w-14 h-14 object-contain rounded-lg shrink-0 bg-white p-1" />}
+                        {item.img && (
+                          <img src={item.img} alt={item.name} className="w-14 h-14 object-contain rounded-lg shrink-0 bg-white p-1" />
+                        )}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-gray-900 leading-snug break-words">{item.name}</p>
                           <p className="text-xs text-gray-400 mt-0.5">${unitPrice.toFixed(2)}</p>
                         </div>
                         <div className="text-right shrink-0">
                           <p className="text-sm font-extrabold text-gray-900">${(unitPrice * item.qty).toFixed(2)}</p>
-                          <button onClick={() => removeItem(item.id)} className="text-[13px] text-gray-300 hover:text-red-400 transition-colors mt-0.5">Sil</button>
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="text-[13px] text-gray-300 hover:text-red-400 transition-colors mt-0.5"
+                          >
+                            Sil
+                          </button>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 pl-[68px]">
-                        <button onClick={() => decrease(item.id)} className="w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-300 hover:text-red-500 transition-colors flex items-center justify-center font-bold text-sm">−</button>
+                        <button
+                          onClick={() => decrease(item.id)}
+                          className="w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-300 hover:text-red-500 transition-colors flex items-center justify-center font-bold text-sm"
+                        >
+                          −
+                        </button>
                         <span className="w-5 text-center text-sm font-bold text-gray-900">{item.qty}</span>
-                        <button onClick={() => increase(item.id)} className="w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-colors flex items-center justify-center font-bold text-sm">+</button>
+                        <button
+                          onClick={() => increase(item.id)}
+                          className="w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-colors flex items-center justify-center font-bold text-sm"
+                        >
+                          +
+                        </button>
                       </div>
                     </div>
                   )
@@ -242,52 +238,17 @@ const Header = () => {
                   <span className="text-gray-500 font-medium">Cəmi</span>
                   <span className="text-xl font-extrabold text-gray-900">${totalPrice.toFixed(2)}</span>
                 </div>
-                <button className="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold hover:bg-amber-500 transition-colors duration-200">Ödəməyə keç</button>
-                <button onClick={() => setOpensebet(false)} className="w-full text-sm text-gray-400 hover:text-gray-700 text-center transition-colors">Alışverişə davam et</button>
+                <button className="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold hover:bg-amber-500 transition-colors duration-200">
+                  Ödəməyə keç
+                </button>
+                <button
+                  onClick={() => setOpensebet(false)}
+                  className="w-full text-sm text-gray-400 hover:text-gray-700 text-center transition-colors"
+                >
+                  Alışverişə davam et
+                </button>
               </div>
             )}
-          </div>
-        </>
-      )}
-
-      {/* ── FAV PANEL ── */}
-      {openFav && (
-        <>
-          <div className="fixed inset-0 bg-opacity-40 z-[100]" onClick={() => setOpenFav(false)} />
-          <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[101] flex flex-col">
-
-            <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">Favorites</h2>
-              <button onClick={() => setOpenFav(false)} className="text-gray-400 hover:text-black font-bold text-2xl leading-none">&times;</button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-              {favList.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 gap-3">
-                  <span className="text-5xl">🤍</span>
-                  <p className="font-medium">Bəyəndiyiniz məhsul yoxdur</p>
-                  <p className="text-sm">Əlavə edin</p>
-                </div>
-              ) : (
-                favList.map(item => (
-                  <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <img src={item.img} alt={item.name} className="w-14 h-14 object-contain rounded-lg bg-white p-1 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{item.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{item.cat}</p>
-                      <p className="text-sm font-extrabold text-gray-900 mt-1">{item.price}</p>
-                    </div>
-                    <button
-                      onClick={() => toggleFav(item)}
-                      className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors shrink-0"
-                    >
-                      <FaHeart className="w-4 h-4 text-red-500" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-
           </div>
         </>
       )}
